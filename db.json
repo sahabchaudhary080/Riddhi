@@ -1,0 +1,344 @@
+{
+  "orders": [
+    {
+      "id": "RSF446288",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "sahabchaudhary080@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Service Area",
+      "item": "Basic Monthly Plan",
+      "amount": 551,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-26",
+      "endDate": "2026-04-25",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-22",
+      "razorpay_order_id": "order_SUFS5yguApqkMH",
+      "payment_status": "confirmed",
+      "created": "2026-03-22T11:04:06.434Z",
+      "razorpay_payment_id": "pay_SUFSEyRdFbzxJV",
+      "razorpay_signature": "7b9667821694ca1fc5e73c6956f16a32fc7d73e46c05f60d4fbbae72afff5ee2"
+    },
+    {
+      "id": "RSF363161",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "sahabchaudhary080@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Service Area",
+      "item": "Flower Packet ×4 + Flower Garland ×2",
+      "amount": 120,
+      "type": "one_time",
+      "agent": "",
+      "startDate": "2026-03-22",
+      "endDate": "2026-03-23",
+      "deliveryDate": "2026-03-28",
+      "bookingDate": "2026-03-22",
+      "razorpay_order_id": "order_SUFQdEgsQ2XXtP",
+      "payment_status": "confirmed",
+      "created": "2026-03-22T11:02:43.306Z",
+      "razorpay_payment_id": "pay_SUFQmgCD05i15w",
+      "razorpay_signature": "d835dadb88c49df9e07126aa8ae085c7cf885b926b49cf37211b0a492d7ce20b"
+    },
+    {
+      "id": "RSF301907",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "sahabchaudhary080@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Service Area",
+      "item": "Royal Monthly Plan",
+      "amount": 1551,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-26",
+      "endDate": "2026-04-25",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-22",
+      "razorpay_order_id": "order_SUFPYNynDyB3gc",
+      "payment_status": "confirmed",
+      "created": "2026-03-22T11:01:42.058Z",
+      "razorpay_payment_id": "pay_SUFPjF3YuqFWSa",
+      "razorpay_signature": "c7f59db02a6af66cabe72a499d1b524eb6b3baedf51e6ede77b10ce3dd44c544"
+    },
+    {
+      "id": "RSF861474",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "sahabchaudhary080@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Service Area",
+      "item": "Premium Monthly Plan",
+      "amount": 1051,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-26",
+      "endDate": "2026-04-25",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-26",
+      "razorpay_order_id": "order_SUFHnftw3jgUwt",
+      "payment_status": "confirmed",
+      "created": "2026-03-22T10:54:21.677Z",
+      "razorpay_payment_id": "pay_SUFI02uIqnLcnK",
+      "razorpay_signature": "e599fdf5d13fbd0fd9ec891019c3b57ca0901d02d211b3ddf84265eb0f396741"
+    },
+    {
+      "id": "RSF908098",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "sahabchaudhary080@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Service Area",
+      "item": "Premium Monthly Plan",
+      "amount": 1051,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-27",
+      "endDate": "2026-04-26",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-27",
+      "razorpay_order_id": "order_SUF111gvPYToIx",
+      "payment_status": "confirmed",
+      "created": "2026-03-22T10:38:28.297Z",
+      "razorpay_payment_id": "pay_SUF1DTUOXDyoe3",
+      "razorpay_signature": "611b3cad2c9f1869de263617efc7b1c233537dcef613ba04f0c244a7bd5758eb"
+    },
+    {
+      "id": "RSF205346",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "amankumar6362932@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Service Area",
+      "item": "Royal Monthly Plan",
+      "amount": 1551,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-24",
+      "endDate": "2026-04-23",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-24",
+      "razorpay_order_id": "order_SUEX2a6TkMVpsN",
+      "payment_status": "confirmed",
+      "created": "2026-03-22T10:10:05.741Z",
+      "razorpay_payment_id": "pay_SUEXOVAPyn1zMv",
+      "razorpay_signature": "a69a0993de3e65c19d4312aa3ea6fdb2995430dbc27ac2743e2285161a6f5bd0"
+    },
+    {
+      "id": "RSF665009",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "amankumar6362932@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Vikaspuri",
+      "item": "Premium Monthly Plan",
+      "amount": 1051,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-21",
+      "endDate": "2026-04-20",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-21",
+      "razorpay_order_id": "order_SToFoYZF96cgZc",
+      "payment_status": "confirmed",
+      "created": "2026-03-21T08:27:45.320Z",
+      "razorpay_payment_id": "pay_SToGJOCCS8TG7B",
+      "razorpay_signature": "2a6d7729c02044f198b2367ce120f3e8409e25a8d93d204ddf839a0fdb8eb329"
+    },
+    {
+      "id": "RSF674338",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "amankumar6362932@gmail.com",
+      "address": "vikaspuri",
+      "area": "Vikaspuri",
+      "item": "Basic Monthly Plan",
+      "amount": 551,
+      "type": "subscription",
+      "agent": "",
+      "startDate": "2026-03-20",
+      "endDate": "2026-04-19",
+      "deliveryDate": null,
+      "bookingDate": "2026-03-20",
+      "razorpay_order_id": "order_STOhTnbWf44C4N",
+      "payment_status": "confirmed",
+      "created": "2026-03-20T07:27:54.810Z",
+      "razorpay_payment_id": "pay_STOhsKqqvoNGEH",
+      "razorpay_signature": "ebba1f19a23195a33114b7e2cce293f0e447dd4cef550fbd49b51ef20a21dd50"
+    },
+    {
+      "id": "RSF927481",
+      "name": "Balu",
+      "phone": "8923471161",
+      "email": "amankumar6362932@gmail.com",
+      "address": "Ranhola Rd\nVikas Nagar, Hastsal",
+      "area": "Vikaspuri",
+      "item": "Flower Packet ×1",
+      "amount": 20,
+      "type": "one_time",
+      "agent": "Aarav",
+      "startDate": "2026-03-17",
+      "endDate": "2026-03-18",
+      "deliveryDate": "2026-03-19",
+      "bookingDate": "2026-03-17",
+      "razorpay_order_id": "order_ST4ryodRrROzjr",
+      "payment_status": "confirmed",
+      "created": "2026-03-17T20:05:27.817Z",
+      "razorpay_payment_id": "pay_ST4sih3e12AvcR",
+      "razorpay_signature": "caa88f00b4308d4c705d02b29caea386b4c61ed37fce5208094e3983ed0ecf29"
+    }
+  ],
+  "agents": [
+    {
+      "id": "A1773778192348",
+      "name": "Aarav",
+      "phone": "8076765021",
+      "areas": [
+        "Vikas Nagar"
+      ],
+      "active": true,
+      "joined": "2026-03-17T20:09:52.348Z"
+    }
+  ],
+  "admins": [
+    {
+      "id": "ADM001",
+      "username": "admin",
+      "password": "admin123",
+      "name": "Owner",
+      "email": "riddhisiddhiflorals@gmail.com",
+      "role": "owner",
+      "active": true,
+      "createdAt": "2026-03-23T15:52:11.611Z",
+      "lastLogin": "2026-03-26T02:03:19.306Z"
+    }
+  ],
+  "siteSettings": {
+    "businessName": "Riddhi Siddhi Florals",
+    "tagline": "Divine Morning Rituals",
+    "footerAbout": "Bringing the divine fragrance of fresh flowers to your doorstep every morning. Enhancing your daily spiritual rituals with nature's finest blooms.",
+    "phone": "8923471161",
+    "whatsapp": "918923471161",
+    "plans": [
+      {
+        "id": "basic",
+        "color": "basic",
+        "icon": "🌼",
+        "name": "Basic Monthly Plan",
+        "price": 551,
+        "type": "sub",
+        "badge": "Basic",
+        "tagline": "Daily fresh flowers at your doorstep",
+        "priceNote": "per month · daily delivery",
+        "features": [
+          "Daily Flower Packet",
+          "Delivered by 10 AM",
+          "Fresh seasonal flowers",
+          "WhatsApp confirmation"
+        ]
+      },
+      {
+        "id": "premium",
+        "color": "premium",
+        "icon": "🌹",
+        "name": "Premium Monthly Plan",
+        "price": 1051,
+        "type": "sub",
+        "badge": "⭐ Popular",
+        "tagline": "Bigger, fresher flower packet daily",
+        "priceNote": "per month · priority delivery",
+        "features": [
+          "Daily Big Flower Packet",
+          "Priority delivery first",
+          "Premium seasonal flowers",
+          "Festival special flowers",
+          "Dedicated WhatsApp support"
+        ]
+      },
+      {
+        "id": "royal",
+        "color": "royal",
+        "icon": "💐",
+        "name": "Royal Monthly Plan",
+        "price": 1551,
+        "type": "sub",
+        "badge": "👑 Royal",
+        "tagline": "Flower Packet + Garland every day",
+        "priceNote": "per month · first priority",
+        "features": [
+          "Daily Flower Packet",
+          "Daily Flower Garland",
+          "First priority delivery",
+          "Festival special arrangements",
+          "VIP WhatsApp support"
+        ]
+      }
+    ],
+    "specificItems": [
+      {
+        "id": "packet",
+        "name": "Flower Packet",
+        "price": 20,
+        "emoji": "🌺"
+      },
+      {
+        "id": "garland",
+        "name": "Flower Garland",
+        "price": 25,
+        "emoji": "💐"
+      }
+    ],
+    "testimonials": [
+      {
+        "text": "Flowers are always fresh and delivered on time. My morning puja feels so complete now. Highly recommend to everyone!",
+        "name": "Sunita Sharma",
+        "loc": "Premium Member",
+        "avatar": "🙏"
+      },
+      {
+        "text": "Been subscribing for 6 months. Never missed a single delivery. The garlands are beautiful and smell divine every morning.",
+        "name": "Ramesh Patel",
+        "loc": "Basic Member",
+        "avatar": "🌸"
+      },
+      {
+        "text": "Ordered for Ganesh Chaturthi and was blown away by the freshness and quality. Will definitely order again for every festival!",
+        "name": "Priya Desai",
+        "loc": "One-Time Customer",
+        "avatar": "💐"
+      }
+    ],
+    "marquee": [
+      {
+        "text": "Fresh Daily Flowers",
+        "emoji": "🌸"
+      },
+      {
+        "text": "Delivered by 10 AM",
+        "emoji": "🚚"
+      },
+      {
+        "text": "Flower Packet ₹20",
+        "emoji": "🌺"
+      },
+      {
+        "text": "Garland ₹25",
+        "emoji": "💐"
+      },
+      {
+        "text": "Basic Plan ₹551/Month",
+        "emoji": "⭐"
+      },
+      {
+        "text": "Premium Plan ₹1051/Month",
+        "emoji": "👑"
+      },
+      {
+        "text": "Perfect for Daily Pooja",
+        "emoji": "🙏"
+      }
+    ]
+  }
+}

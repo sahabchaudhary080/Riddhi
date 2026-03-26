@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+// Auth check — redirect to login if not authenticated
+(async function(){
+  try{
+    const res = await fetch("/api/auth/check");
+    const data = await res.json();
+    if(!data.loggedIn) window.location.href = "/login";
+  }catch(e){ window.location.href = "/login"; }
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Riddhi Siddhi Florals</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --primary:#4338CA;--primary2:#6366F1;--primary-light:#EEF2FF;--primary-dark:#312E81;
+  --accent:#D97706;--accent-light:#FFFBEB;
+  --green:#059669;--green-light:#ECFDF5;
+  --red:#DC2626;--red-light:#FEF2F2;
+  --orange:#EA580C;--orange-light:#FFF7ED;
+  --text:#0A0A0A;--text2:#1F2937;--muted:#374151;--muted2:#4B5563;
+  --border:#E5E7EB;--border2:#D1D5DB;
+  --bg:#F9FAFB;--white:#FFFFFF;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+  --shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14.5px;}
+h1,h2,h3,.serif{font-family:'Libre Baskerville',serif;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:4px;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;width:252px;height:100vh;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
+.sidebar-logo-top{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:40px;height:40px;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--orange));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 4px 10px rgba(67,56,202,0.3);}
+.logo-name{font-family:'Libre Baskerville',serif;font-size:0.88rem;color:var(--text);line-height:1.35;font-weight:700;}
+.logo-sub{font-size:0.64rem;color:#374151;margin-top:6px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+.nav-section{padding:14px 10px 4px;}
+.nav-label{font-size:0.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#374151;padding:0 10px;margin-bottom:5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:0.88rem;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:var(--bg);color:var(--text2);}
+.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600;}
+.nav-icon{font-size:0.95rem;width:20px;text-align:center;flex-shrink:0;}
+.sidebar-footer{margin-top:auto;padding:14px 10px;border-top:1px solid var(--border);}
+.admin-badge{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg);border-radius:8px;}
+.admin-avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--orange));display:flex;align-items:center;justify-content:center;font-size:0.88rem;}
+.admin-name{font-family:'Libre Baskerville',serif;font-size:0.82rem;font-weight:700;color:var(--text);}
+.admin-role{font-size:0.66rem;color:#374151;font-weight:500;}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:252px;right:0;height:60px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99;box-shadow:var(--shadow-sm);}
+.page-title{font-family:'Libre Baskerville',serif;font-size:1.12rem;color:var(--text);font-weight:700;}
+.page-sub{font-size:0.72rem;color:#374151;margin-top:2px;font-weight:500;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.topbar-clock{font-size:0.75rem;color:var(--text2);background:var(--bg);padding:5px 13px;border-radius:6px;border:1px solid var(--border);font-weight:500;}
+.topbar-btn{width:34px;height:34px;border-radius:7px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.88rem;transition:all .15s;text-decoration:none;color:var(--text);}
+.topbar-btn:hover{background:var(--primary-light);border-color:var(--primary2);}
+
+/* MAIN */
+.main{margin-left:252px;margin-top:60px;padding:24px;min-height:calc(100vh - 60px);}
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--white);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden;transition:all .2s;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.stat-card.indigo::after{background:var(--primary);}
+.stat-card.amber::after{background:var(--accent);}
+.stat-card.emerald::after{background:var(--green);}
+.stat-card.violet::after{background:#7C3AED;}
+.stat-icon-wrap{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;margin-bottom:12px;}
+.stat-card.indigo .stat-icon-wrap{background:var(--primary-light);}
+.stat-card.amber .stat-icon-wrap{background:var(--accent-light);}
+.stat-card.emerald .stat-icon-wrap{background:var(--green-light);}
+.stat-card.violet .stat-icon-wrap{background:#F5F3FF;}
+.stat-val{font-family:'Libre Baskerville',serif;font-size:1.85rem;color:var(--text);line-height:1;margin-bottom:4px;font-weight:700;}
+.stat-label{font-size:0.72rem;color:#374151;text-transform:uppercase;letter-spacing:.1em;font-weight:700;}
+
+/* SEC HEADER */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.sec-hdr h2{font-family:'Libre Baskerville',serif;font-size:1.02rem;color:var(--text);font-weight:700;}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:hover{background:var(--primary-dark);box-shadow:0 4px 12px rgba(67,56,202,0.3);transform:translateY(-1px);}
+.btn-green{background:var(--green);color:white;}
+.btn-green:hover{background:#047857;transform:translateY(-1px);}
+.btn-red{background:var(--red);color:white;}
+.btn-red:hover{background:#B91C1C;transform:translateY(-1px);}
+.btn-ghost{background:var(--white);color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--bg);}
+.btn-sm{padding:6px 12px;font-size:0.76rem;border-radius:6px;}
+.btn-xs{padding:3px 8px;font-size:0.7rem;border-radius:5px;}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.filter-bar input,.filter-bar select{padding:8px 13px;background:var(--white);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;transition:all .15s;}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(67,56,202,0.1);}
+.filter-bar input::placeholder{color:var(--muted2);}
+
+/* AREA GROUP */
+.area-group{margin-bottom:16px;border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+.area-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--border);border-bottom:2px solid var(--border);cursor:pointer;user-select:none;transition:background .15s;}
+.area-header:hover{background:var(--bg);}
+.area-name{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.88rem;color:var(--text);flex:1;}
+.area-count{font-size:0.72rem;background:var(--primary-light);color:var(--primary);padding:3px 11px;border-radius:20px;font-weight:700;}
+.area-toggle{font-size:0.75rem;color:var(--muted);transition:transform .2s;}
+.area-toggle.open{transform:rotate(180deg);}
+.orders-list{border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;}
+
+/* ORDER CARD */
+.order-card{background:var(--white);padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;transition:background .12s;}
+.order-card:last-child{border-bottom:none;}
+.order-card:hover{background:#FAFAFA;}
+.order-num{width:28px;height:28px;border-radius:7px;flex-shrink:0;margin-top:2px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:0.73rem;font-weight:700;}
+.order-main{flex:1;min-width:180px;}
+.order-name{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.9rem;color:var(--text);}
+.order-phone{font-size:0.8rem;color:#374151;margin-top:2px;font-weight:500;}
+.order-address{font-size:0.78rem;color:#374151;margin-top:3px;line-height:1.45;font-weight:500;}
+.order-plan{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:0.71rem;background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:600;border:1px solid #FDE68A;}
+.order-meta{display:flex;flex-direction:column;gap:5px;align-items:flex-end;min-width:115px;}
+.order-amount{font-family:'Libre Baskerville',serif;font-size:1.12rem;color:var(--text);font-weight:700;}
+.order-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:4px;}
+.assign-wrap{display:flex;gap:5px;align-items:center;}
+.assign-select{padding:4px 8px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:0.72rem;outline:none;max-width:120px;font-family:'DM Sans',sans-serif;}
+.validity-wrap{margin-top:6px;}
+.validity-label{display:flex;justify-content:space-between;font-size:0.7rem;color:#374151;margin-bottom:4px;font-weight:600;}
+.validity-track{height:3px;background:#E5E7EB;border-radius:2px;overflow:hidden;width:115px;}
+.validity-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),#10B981);transition:width 1s;}
+.validity-fill.expiring{background:linear-gradient(90deg,var(--orange),var(--accent));}
+
+/* AGENTS */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.agent-card{background:var(--white);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);transition:all .2s;}
+.agent-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.agent-avatar{width:44px;height:44px;border-radius:10px;margin-bottom:12px;background:linear-gradient(135deg,var(--primary),var(--orange));display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.agent-name{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.92rem;color:var(--text);margin-bottom:4px;}
+.agent-info{font-size:0.8rem;color:#1F2937;margin-bottom:2px;font-weight:500;}
+.agent-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.area-tag{display:inline-block;font-size:0.65rem;background:var(--orange-light);color:var(--orange);padding:3px 9px;border-radius:20px;margin:2px;font-weight:500;}
+
+/* CUSTOMERS */
+.customers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;}
+.customer-card{background:var(--white);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);transition:all .2s;}
+.customer-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.cust-avatar{width:44px;height:44px;border-radius:10px;margin-bottom:12px;background:linear-gradient(135deg,var(--orange),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
+.cust-name{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.9rem;color:var(--text);margin-bottom:3px;}
+.cust-info{font-size:0.78rem;color:#1F2937;margin-bottom:2px;font-weight:500;}
+
+/* TODAY */
+.today-area-group{margin-bottom:20px;}
+.today-area-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:9px 14px;background:var(--orange-light);border-radius:8px;border:1px solid #FED7AA;}
+.today-area-name{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.86rem;color:var(--orange);flex:1;}
+.today-area-count{font-size:0.72rem;color:var(--muted);}
+.schedule-item{background:var(--white);border-radius:10px;padding:13px 16px;border:1px solid var(--border);display:flex;align-items:center;gap:13px;margin-bottom:7px;transition:all .15s;box-shadow:var(--shadow-sm);}
+.schedule-item:hover{border-color:var(--primary2);box-shadow:var(--shadow);}
+.sched-num{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--orange),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.76rem;font-weight:700;color:white;}
+.sched-info{flex:1;}
+.sched-name{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.86rem;color:var(--text);}
+.sched-addr{font-size:0.76rem;color:#1F2937;margin-top:2px;font-weight:500;}
+.sched-item{font-size:0.76rem;color:var(--accent);margin-top:2px;font-weight:600;}
+.sched-actions{display:flex;gap:5px;align-items:center;}
+
+/* EXPORT PAGE */
+.export-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:22px;margin-bottom:16px;box-shadow:var(--shadow);}
+.export-card-title{font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:4px;}
+.export-card-sub{font-size:0.78rem;color:#374151;margin-bottom:16px;line-height:1.5;font-weight:500;}
+.filter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:16px;}
+.filter-group label{display:block;font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#1F2937;margin-bottom:5px;}
+.filter-group input,.filter-group select{width:100%;padding:8px 11px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.81rem;outline:none;transition:all .15s;}
+.filter-group input:focus,.filter-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(67,56,202,0.1);}
+.export-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.export-btn.green{background:var(--green);color:white;}
+.export-btn.green:hover{background:#047857;box-shadow:0 4px 12px rgba(5,150,105,0.3);transform:translateY(-1px);}
+.export-btn.indigo{background:var(--primary);color:white;}
+.export-btn.indigo:hover{background:var(--primary-dark);box-shadow:0 4px 12px rgba(67,56,202,0.3);transform:translateY(-1px);}
+.export-btn.amber{background:var(--accent);color:white;}
+.export-btn.amber:hover{background:#B45309;transform:translateY(-1px);}
+.export-btn.violet{background:#7C3AED;color:white;}
+.export-btn.violet:hover{background:#6D28D9;transform:translateY(-1px);}
+.export-btn.orange{background:var(--orange);color:white;}
+.export-btn.orange:hover{background:#C2410C;transform:translateY(-1px);}
+.export-btn.full{background:var(--primary-dark);color:white;width:100%;justify-content:center;padding:11px;}
+.export-btn.full:hover{box-shadow:0 4px 14px rgba(49,46,129,0.4);transform:translateY(-1px);}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:16px;padding:28px;width:90%;max-width:450px;border:1px solid var(--border);box-shadow:0 25px 50px rgba(0,0,0,0.15);animation:modalPop .18s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+@keyframes modalPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h3{font-family:'Libre Baskerville',serif;font-size:1.15rem;margin-bottom:20px;color:var(--text);font-weight:700;}
+.modal label{display:block;font-size:0.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.modal input,.modal select,.modal textarea{width:100%;padding:10px 13px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.86rem;outline:none;margin-bottom:13px;transition:all .15s;}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--primary);background:var(--white);box-shadow:0 0 0 3px rgba(67,56,202,0.1);}
+.modal input::placeholder,.modal textarea::placeholder{color:var(--muted2);}
+.modal textarea{min-height:72px;resize:vertical;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+.modal-note{font-size:0.73rem;color:#92400E;margin-bottom:14px;padding:9px 13px;background:var(--accent-light);border-radius:8px;border-left:3px solid var(--accent);font-weight:500;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:white;padding:11px 18px;border-radius:10px;font-size:0.81rem;z-index:9999;opacity:0;transform:translateY(8px);transition:all .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-weight:500;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{background:#065F46;}
+.toast.error{background:#991B1B;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:0.67rem;font-weight:700;}
+.badge-active{background:var(--green-light);color:var(--green);}
+.badge-expiring{background:var(--orange-light);color:var(--orange);}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:56px 20px;color:var(--muted);}
+.empty-icon{font-size:2.8rem;margin-bottom:12px;opacity:.35;display:block;}
+.empty-text{font-size:0.88rem;}
+
+.sidebar-toggle{display:none;position:fixed;top:13px;left:13px;z-index:200;background:var(--primary);color:white;border:none;border-radius:7px;padding:7px 10px;font-size:1rem;cursor:pointer;box-shadow:0 4px 12px rgba(67,56,202,0.35);}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-toggle{display:block;}
+  .main{margin-left:0;padding:14px;}
+  .topbar{left:0;padding:0 14px 0 52px;}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .agents-grid,.customers-grid{grid-template-columns:1fr;}
+  .order-card{flex-direction:column;gap:8px;}
+  .order-meta{align-items:flex-start;flex-direction:row;gap:12px;}
+  .filter-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-top">
+      <div class="logo-icon">🌸</div>
+      <div class="logo-name">Riddhi Siddhi<br>Florals</div>
+    </div>
+    <div class="logo-sub">Admin Panel</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('orders',this)"><span class="nav-icon">📦</span> Active Orders</div>
+    <div class="nav-item" onclick="showPage('today',this)"><span class="nav-icon">📅</span> Today's Delivery</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Manage</div>
+    <div class="nav-item" onclick="showPage('agents',this)"><span class="nav-icon">🛵</span> Delivery Agents</div>
+    <div class="nav-item" onclick="showPage('customers',this)"><span class="nav-icon">👥</span> Customers</div>
+  </div>
+  <div class="nav-section" id="owner-nav" style="display:none;">
+    <div class="nav-label">Admin</div>
+    <div class="nav-item" onclick="showPage('admins',this)"><span class="nav-icon">🔐</span> Manage Admins</div>
+    <div class="nav-item" onclick="showPage('websettings',this)"><span class="nav-icon">🌐</span> Website Settings</div>
+    <div class="nav-item" onclick="showPage('changepass',this)"><span class="nav-icon">🔑</span> Change Password</div>
+  </div>
+  <div class="nav-section" id="staff-nav" style="display:none;">
+    <div class="nav-label">Account</div>
+    <div class="nav-item" onclick="showPage('changepass',this)"><span class="nav-icon">🔑</span> Change Password</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Reports</div>
+    <div class="nav-item" onclick="showPage('export',this)"><span class="nav-icon">📤</span> Export to Excel</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Links</div>
+    <div class="nav-item" onclick="window.open('index.html','_blank')"><span class="nav-icon">🌐</span> Visit Website</div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar">🙏</div>
+      <div>
+        <div class="admin-name">Admin</div>
+        <div class="admin-role">Riddhi Siddhi Florals</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div>
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="page-sub" id="pageSub">Today's overview</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-clock" id="clock">--:--</div>
+    <a class="topbar-btn" href="index.html" target="_blank" title="Visit Website">🌐</a>
+    <button class="topbar-btn" onclick="doLogout()" title="Logout" style="background:#FEF2F2;border-color:#FECACA;color:#DC2626;">🚪</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card indigo"><div class="stat-icon-wrap">📦</div><div class="stat-val" id="s-total">0</div><div class="stat-label">Active Orders</div></div>
+      <div class="stat-card amber"><div class="stat-icon-wrap">💰</div><div class="stat-val" id="s-revenue">₹0</div><div class="stat-label">Total Revenue</div></div>
+      <div class="stat-card emerald"><div class="stat-icon-wrap">📅</div><div class="stat-val" id="s-today">0</div><div class="stat-label">Today's Orders</div></div>
+      <div class="stat-card violet"><div class="stat-icon-wrap">👥</div><div class="stat-val" id="s-cust">0</div><div class="stat-label">Total Customers</div></div>
+    </div>
+    <div class="sec-hdr"><h2>📍 Area-wise Active Orders</h2></div>
+    <div id="dashAreaSummary"></div>
+    <div class="sec-hdr" style="margin-top:24px;"><h2>🌸 Plan Breakdown</h2></div>
+    <div id="planBreakdown" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- ACTIVE ORDERS -->
+  <div class="page" id="page-orders">
+    <div class="filter-bar">
+      <input type="text" id="orderSearch" placeholder="🔍 Search by name or phone..." oninput="renderOrders()">
+      <select id="orderArea" onchange="renderOrders()"><option value="">All Areas</option></select>
+      <select id="orderPlan" onchange="renderOrders()">
+        <option value="">All Plans</option>
+        <option value="Basic Monthly Plan">Basic</option>
+        <option value="Premium Monthly Plan">Premium</option>
+        <option value="Royal Monthly Plan">Royal</option>
+        <option value="Specific Day Order">Specific Day</option>
+      </select>
+      <button class="btn btn-primary" onclick="openAddOrderModal()">+ Add Order</button>
+    </div>
+    <div id="ordersContainer"></div>
+  </div>
+
+  <!-- TODAY -->
+  <div class="page" id="page-today">
+    <div class="sec-hdr">
+      <h2>📅 Today's Deliveries &nbsp;<span id="todayDateLabel" style="font-size:0.8rem;color:var(--accent);font-weight:400;font-family:'DM Sans',sans-serif;"></span></h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="todayCount" style="font-size:0.79rem;color:var(--muted);font-weight:500;"></span>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+    <div id="todayContainer"></div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="page" id="page-agents">
+    <div class="sec-hdr">
+      <h2>🛵 Delivery Agents</h2>
+      <button class="btn btn-primary" onclick="openAgentModal()">+ Add Agent</button>
+    </div>
+    <div class="agents-grid" id="agentsGrid"></div>
+  </div>
+
+  <!-- CUSTOMERS -->
+  <div class="page" id="page-customers">
+    <div class="sec-hdr"><h2>👥 Customers</h2></div>
+    <div class="filter-bar">
+      <input type="text" id="custSearch" placeholder="🔍 Search by name or phone..." oninput="renderCustomers()">
+    </div>
+    <div class="customers-grid" id="customersGrid"></div>
+  </div>
+
+  <!-- ════════════════════════════════
+       EXPORT PAGE — FLEXIBLE FILTERS
+       ════════════════════════════════ -->
+  <div class="page" id="page-export">
+    <div class="sec-hdr"><h2>📤 Export Data to Excel</h2></div>
+
+    <!-- 1. ACTIVE ORDERS -->
+    <div class="export-card">
+      <div class="export-card-title">📦 Active Orders</div>
+      <div class="export-card-sub">Filter by date range, area, plan, agent — then download.</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>From Date</label>
+          <input type="date" id="exp_ord_from">
+        </div>
+        <div class="filter-group">
+          <label>To Date</label>
+          <input type="date" id="exp_ord_to">
+        </div>
+        <div class="filter-group">
+          <label>Area</label>
+          <select id="exp_ord_area"><option value="">All Areas</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Plan</label>
+          <select id="exp_ord_plan">
+            <option value="">All Plans</option>
+            <option value="Basic Monthly Plan">Basic Monthly</option>
+            <option value="Premium Monthly Plan">Premium Monthly</option>
+            <option value="Royal Monthly Plan">Royal Monthly</option>
+            <option value="Specific Day Order">Specific Day</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Agent</label>
+          <select id="exp_ord_agent"><option value="">All Agents</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Status</label>
+          <select id="exp_ord_status">
+            <option value="">All</option>
+            <option value="active">Active Only</option>
+            <option value="expiring">Expiring Soon (≤5 days)</option>
+          </select>
+        </div>
+      </div>
+      <button class="export-btn green" onclick="exportFilteredOrders()">📥 Download Active Orders (.xlsx)</button>
+    </div>
+
+    <!-- 2. ALL ORDERS HISTORY -->
+    <div class="export-card">
+      <div class="export-card-title">📋 All Orders — Full History</div>
+      <div class="export-card-sub">Includes expired & past orders. Filter by date range or payment status.</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>From Date</label>
+          <input type="date" id="exp_all_from">
+        </div>
+        <div class="filter-group">
+          <label>To Date</label>
+          <input type="date" id="exp_all_to">
+        </div>
+        <div class="filter-group">
+          <label>Area</label>
+          <select id="exp_all_area"><option value="">All Areas</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Plan</label>
+          <select id="exp_all_plan">
+            <option value="">All Plans</option>
+            <option value="Basic Monthly Plan">Basic Monthly</option>
+            <option value="Premium Monthly Plan">Premium Monthly</option>
+            <option value="Royal Monthly Plan">Royal Monthly</option>
+            <option value="Specific Day Order">Specific Day</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Payment Status</label>
+          <select id="exp_all_pay">
+            <option value="">All</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <button class="export-btn indigo" onclick="exportAllOrdersFiltered()">📥 Download Order History (.xlsx)</button>
+    </div>
+
+    <!-- 3. TODAY'S DELIVERY -->
+    <div class="export-card">
+      <div class="export-card-title">📅 Delivery Schedule</div>
+      <div class="export-card-sub">Export delivery list for any specific date, filtered by area or agent.</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Delivery Date</label>
+          <input type="date" id="exp_del_date">
+        </div>
+        <div class="filter-group">
+          <label>Area</label>
+          <select id="exp_del_area"><option value="">All Areas</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Agent</label>
+          <select id="exp_del_agent"><option value="">All Agents</option></select>
+        </div>
+      </div>
+      <button class="export-btn orange" onclick="exportDeliverySchedule()">📥 Download Delivery List (.xlsx)</button>
+    </div>
+
+    <!-- 4. CUSTOMERS -->
+    <div class="export-card">
+      <div class="export-card-title">👥 Customers</div>
+      <div class="export-card-sub">Customer directory with spending summary. Filter by area.</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Area</label>
+          <select id="exp_cust_area"><option value="">All Areas</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Has Active Order</label>
+          <select id="exp_cust_active">
+            <option value="">All Customers</option>
+            <option value="yes">With Active Orders</option>
+            <option value="no">No Active Orders</option>
+          </select>
+        </div>
+      </div>
+      <button class="export-btn violet" onclick="exportCustomersFiltered()">📥 Download Customers (.xlsx)</button>
+    </div>
+
+    <!-- 5. REVENUE REPORT -->
+    <div class="export-card">
+      <div class="export-card-title">💰 Revenue Report</div>
+      <div class="export-card-sub">Financial summary filtered by date range or plan type.</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>From Date</label>
+          <input type="date" id="exp_rev_from">
+        </div>
+        <div class="filter-group">
+          <label>To Date</label>
+          <input type="date" id="exp_rev_to">
+        </div>
+        <div class="filter-group">
+          <label>Plan</label>
+          <select id="exp_rev_plan">
+            <option value="">All Plans</option>
+            <option value="Basic Monthly Plan">Basic Monthly</option>
+            <option value="Premium Monthly Plan">Premium Monthly</option>
+            <option value="Royal Monthly Plan">Royal Monthly</option>
+            <option value="Specific Day Order">Specific Day</option>
+          </select>
+        </div>
+      </div>
+      <button class="export-btn amber" onclick="exportRevenueFiltered()">📥 Download Revenue Report (.xlsx)</button>
+    </div>
+
+    <!-- 6. AGENTS -->
+    <div class="export-card">
+      <div class="export-card-title">🛵 Delivery Agents</div>
+      <div class="export-card-sub">Agent list with their assigned areas and status.</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Status</label>
+          <select id="exp_agent_status">
+            <option value="">All Agents</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
+        </div>
+      </div>
+      <button class="export-btn green" onclick="exportAgentsFiltered()">📥 Download Agents (.xlsx)</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FULL REPORT -->
+    <div class="export-card" style="background:linear-gradient(135deg,#EEF2FF,#FFFBEB);border-color:#C7D2FE;">
+      <div class="export-card-title">⭐ Full Business Report</div>
+      <div class="export-card-sub">Everything in one Excel file — 5 sheets: Active Orders, History, Customers, Revenue, Agents.</div>
+      <button class="export-btn full" onclick="exportFullReport()">📥 Download Complete Report (.xlsx)</button>
+    </div>
+  </div>
+
+
+  <!-- WEBSITE SETTINGS (Owner only) -->
+  <div class="page" id="page-websettings">
+    <div id="webSettingsContent"></div>
+  </div>
+
+  <!-- MANAGE ADMINS (Owner only) -->
+  <div class="page" id="page-admins">
+    <div class="sec-hdr">
+      <h2>🔐 Manage Admins</h2>
+      <button class="btn btn-primary" onclick="openAddAdminModal()">+ Add Admin</button>
+    </div>
+    <div id="adminsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="page" id="page-changepass">
+    <div style="max-width:460px;">
+      <div style="background:var(--white);border-radius:12px;border:1px solid var(--border);padding:28px;box-shadow:var(--shadow);">
+        <h2 style="font-family:'Libre Baskerville',serif;font-size:1.05rem;color:var(--text);margin-bottom:20px;">🔑 Change Your Password</h2>
+        <div id="cp-error" style="display:none;background:#FEF2F2;color:#991B1B;font-size:0.78rem;font-weight:500;padding:9px 13px;border-radius:8px;border-left:3px solid #DC2626;margin-bottom:14px;"></div>
+        <div id="cp-success" style="display:none;background:#ECFDF5;color:#065F46;font-size:0.78rem;font-weight:500;padding:9px 13px;border-radius:8px;border-left:3px solid #059669;margin-bottom:14px;"></div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#374151;margin-bottom:6px;">Current Password</label>
+          <input type="password" id="cp_current" placeholder="Enter current password" style="width:100%;padding:10px 13px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.86rem;outline:none;">
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#374151;margin-bottom:6px;">New Password</label>
+          <input type="password" id="cp_new" placeholder="Min. 6 characters" style="width:100%;padding:10px 13px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.86rem;outline:none;">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:0.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#374151;margin-bottom:6px;">Confirm New Password</label>
+          <input type="password" id="cp_confirm" placeholder="Repeat new password" style="width:100%;padding:10px 13px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.86rem;outline:none;">
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:11px;justify-content:center;" onclick="changePassword()">🔒 Update Password</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD ADMIN MODAL -->
+<div class="modal-bg" id="addAdminModal">
+  <div class="modal">
+    <h3>🔐 <span id="adminModalTitle">Add New Admin</span></h3>
+    <input type="hidden" id="adm_id">
+    <label>Full Name *</label>
+    <input type="text" id="adm_name" placeholder="e.g. Rahul Sharma">
+    <label>Username * <span style="font-size:0.65rem;color:var(--muted);font-weight:400;">(login ke liye use hoga)</span></label>
+    <input type="text" id="adm_username" placeholder="e.g. rahul123">
+    <label>Password * <span id="adm_pass_label" style="font-size:0.65rem;color:var(--muted);font-weight:400;">(min. 6 characters)</span></label>
+    <input type="password" id="adm_password" placeholder="Strong password">
+    <label>Email <span style="font-size:0.65rem;color:var(--muted);font-weight:400;">(forgot password ke liye)</span></label>
+    <input type="email" id="adm_email" placeholder="admin@email.com">
+    <label>Role</label>
+    <select id="adm_role">
+      <option value="staff">Staff (Limited access)</option>
+      <option value="owner">Owner (Full access)</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('addAdminModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveAdminBtn" onclick="saveAdmin()">💾 Save Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL (by owner) -->
+<div class="modal-bg" id="resetPassModal">
+  <div class="modal">
+    <h3>🔑 Reset Password</h3>
+    <input type="hidden" id="rp_admin_id">
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;">Reset password for: <strong id="rp_admin_name" style="color:var(--text);"></strong></p>
+    <div id="rp-error" style="display:none;background:#FEF2F2;color:#991B1B;font-size:0.78rem;padding:9px 13px;border-radius:8px;border-left:3px solid #DC2626;margin-bottom:14px;"></div>
+    <label>New Password *</label>
+    <input type="password" id="rp_password" placeholder="Min. 6 characters">
+    <label>Confirm Password *</label>
+    <input type="password" id="rp_confirm" placeholder="Repeat new password">
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('resetPassModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="doResetAdminPass()">🔒 Reset Password</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="addOrderModal">
+  <div class="modal">
+    <h3>📦 Add New Order</h3>
+    <div class="modal-note">⚡ Only add confirmed & paid orders here</div>
+    <label>Customer Name *</label><input type="text" id="ao_name" placeholder="e.g. Priya Sharma">
+    <label>Phone Number *</label><input type="tel" id="ao_phone" placeholder="10-digit number">
+    <label>Delivery Address *</label><textarea id="ao_address" placeholder="Full delivery address..."></textarea>
+    <label>Area / Locality *</label><input type="text" id="ao_area" placeholder="e.g. Sector 5, Vikas Nagar">
+    <label>Plan *</label>
+    <select id="ao_plan">
+      <option value="">Select a plan</option>
+      <option value="Basic Monthly Plan|551|subscription|30">Basic Monthly – ₹551/month</option>
+      <option value="Premium Monthly Plan|1051|subscription|30">Premium Monthly – ₹1051/month</option>
+      <option value="Royal Monthly Plan|1551|subscription|30">Royal Monthly – ₹1551/month</option>
+      <option value="Specific Day Order|20|one_time|1">Specific Day – ₹20/item</option>
+    </select>
+    <label>Start Date *</label><input type="date" id="ao_start">
+    <label>Email (optional)</label><input type="email" id="ao_email" placeholder="customer@email.com">
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('addOrderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addOrder()">✅ Save Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT MODAL -->
+<div class="modal-bg" id="agentModal">
+  <div class="modal">
+    <h3>🛵 <span id="agentModalTitle">Add New Agent</span></h3>
+    <input type="hidden" id="ag_id">
+    <label>Full Name *</label><input type="text" id="ag_name" placeholder="e.g. Raju Kumar">
+    <label>Phone / WhatsApp *</label><input type="tel" id="ag_phone" placeholder="10-digit number">
+    <label>Delivery Areas (comma separated)</label>
+    <input type="text" id="ag_areas" placeholder="e.g. Sector 5, Vikas Nagar, Old Town">
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('agentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAgent()">💾 Save Agent</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='/api';
+const todayStr=()=>new Date().toISOString().split('T')[0];
+function isActive(o){if(o.type==='one_time')return o.startDate>=todayStr();return o.endDate>=todayStr();}
+function daysLeft(o){return Math.max(0,Math.ceil((new Date(o.endDate)-new Date())/86400000));}
+function daysUsed(o){const s=new Date(o.startDate),e=new Date(o.endDate),n=new Date();const total=Math.max(1,Math.ceil((e-s)/86400000));const used=Math.max(0,Math.ceil((n-s)/86400000));return{used,total};}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function planEmoji(i){if(i.includes('Basic'))return'🌼';if(i.includes('Premium'))return'🌹';if(i.includes('Royal'))return'👑';return'📅';}
+function offset(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function groupByArea(orders){const m={};orders.forEach(o=>{const a=o.area||'Other';if(!m[a])m[a]=[];m[a].push(o);});return m;}
+function calcEnd(start,days){const d=new Date(start);d.setDate(d.getDate()+parseInt(days));return d.toISOString().split('T')[0];}
+
+async function fetchOrders(){const r=await fetch(`${API}/orders/active`);const d=await r.json();return d.orders||[];}
+async function fetchAllOrders(){const r=await fetch(`${API}/orders`);const d=await r.json();return d.orders||[];}
+async function fetchAgents(){const r=await fetch(`${API}/agents`);const d=await r.json();return d.agents||[];}
+async function fetchTodayOrders(){const r=await fetch(`${API}/orders/today`);const d=await r.json();return d.orders||[];}
+
+const pageMeta={
+  dashboard:['Dashboard','Today\'s overview'],
+  orders:['Active Orders','All active subscriptions — auto removed after expiry'],
+  today:['Today\'s Delivery','Orders to be delivered today'],
+  agents:['Delivery Agents','Your delivery team'],
+  customers:['Customers','All registered customers'],
+  export:['Export to Excel','Download filtered business data as Excel files'],
+  admins:['Manage Admins','Add, edit and manage admin accounts'],
+  websettings:['Website Settings','Change prices, plans & content shown on your website'],
+  changepass:['Change Password','Update your login password']
+};
+
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  const[t,s]=pageMeta[name]||[name,''];
+  document.getElementById('pageTitle').textContent=t;
+  document.getElementById('pageSub').textContent=s;
+  if(name==='dashboard')renderDashboard();
+  if(name==='orders')renderOrders();
+  if(name==='today')renderToday();
+  if(name==='agents')renderAgents();
+  if(name==='customers')renderCustomers();
+  if(name==='export')initExportFilters();
+  if(name==='admins')renderAdmins();
+  if(name==='websettings')renderWebSettings();
+  if(window.innerWidth<768)document.getElementById('sidebar').classList.remove('open');
+}
+
+// ── LOGOUT ──
+async function doLogout(){
+  if(!confirm("Are you sure you want to logout?")) return;
+  await fetch("/api/auth/logout", {method:"POST"});
+  window.location.href = "/login";
+}
+
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleString('en-IN',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});},1000);
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='success'?'✅ ':'❌ ')+msg;
+  t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',3200);
+}
+
+// ── DASHBOARD ──
+async function renderDashboard(){
+  try{
+    const res=await fetch(`${API}/stats`);const data=await res.json();const s=data.stats;
+    document.getElementById('s-total').textContent=s.totalActive;
+    document.getElementById('s-revenue').textContent='₹'+s.revenue.toLocaleString('en-IN');
+    document.getElementById('s-today').textContent=s.todayOrders;
+    document.getElementById('s-cust').textContent=s.customers;
+    const areaMap=s.areaWise||{};
+    document.getElementById('dashAreaSummary').innerHTML=Object.keys(areaMap).length?
+      `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;">
+        ${Object.entries(areaMap).map(([area,count])=>`
+          <div style="background:var(--white);border-radius:10px;padding:16px;border:1px solid var(--border);cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm);" onmouseover="this.style.borderColor='#6366F1';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'" onclick="filterByArea('${area}')">
+            <div style="font-size:0.7rem;color:var(--muted);margin-bottom:5px;font-weight:600;">📍 ${area}</div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:1.85rem;color:var(--text);line-height:1;font-weight:700;">${count}</div>
+            <div style="font-size:0.7rem;color:var(--primary);margin-top:4px;font-weight:600;">active orders</div>
+          </div>`).join('')}
+      </div>`:
+      '<div class="empty-state"><span class="empty-icon">📍</span><div class="empty-text">No active orders</div></div>';
+    const active=await fetchOrders();
+    const plans=[{l:'Basic',e:'🌼',k:'Basic Monthly Plan'},{l:'Premium',e:'🌹',k:'Premium Monthly Plan'},{l:'Royal',e:'👑',k:'Royal Monthly Plan'},{l:'Specific',e:'📅',k:'Specific Day Order'}];
+    document.getElementById('planBreakdown').innerHTML=plans.map(p=>{
+      const count=active.filter(o=>o.item===p.k).length;
+      return `<div style="background:var(--white);border-radius:10px;padding:14px 18px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);min-width:130px;">
+        <span style="font-size:1.4rem;">${p.e}</span>
+        <div><div style="font-size:0.7rem;color:var(--muted);font-weight:600;letter-spacing:.04em;">${p.l}</div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:1.6rem;color:var(--text);line-height:1;font-weight:700;">${count}</div></div>
+      </div>`;
+    }).join('');
+  }catch(e){toast('Failed to load data','error');}
+}
+
+// ── ACTIVE ORDERS ──
+async function renderOrders(){
+  try{
+    let orders=await fetchOrders();
+    const agents=await fetchAgents();
+    const search=(document.getElementById('orderSearch')?.value||'').toLowerCase();
+    const area=document.getElementById('orderArea')?.value||'';
+    const plan=document.getElementById('orderPlan')?.value||'';
+    if(search)orders=orders.filter(o=>o.name.toLowerCase().includes(search)||o.phone.includes(search));
+    if(area)orders=orders.filter(o=>o.area===area);
+    if(plan)orders=orders.filter(o=>o.item===plan);
+    const dd=document.getElementById('orderArea');
+    if(dd&&dd.options.length<=1){
+      const all=await fetchOrders();
+      [...new Set(all.map(o=>o.area||'Other'))].sort().forEach(a=>{const opt=document.createElement('option');opt.value=a;opt.textContent=a;dd.appendChild(opt);});
+    }
+    const areaMap=groupByArea(orders);
+    const activeAgents=agents.filter(a=>a.active);
+    if(!Object.keys(areaMap).length){document.getElementById('ordersContainer').innerHTML='<div class="empty-state"><span class="empty-icon">📦</span><div class="empty-text">No active orders found</div></div>';return;}
+    document.getElementById('ordersContainer').innerHTML=Object.entries(areaMap).map(([area,list])=>`
+      <div class="area-group">
+        <div class="area-header" onclick="toggleArea(this)">
+          <span>📍</span><span class="area-name">${area}</span>
+          <span class="area-count">${list.length} order${list.length>1?'s':''}</span>
+          <span class="area-toggle open">▼</span>
+        </div>
+        <div class="orders-list">${list.map((o,i)=>orderCardHTML(o,i+1,activeAgents)).join('')}</div>
+      </div>`).join('');
+  }catch(e){toast('Failed to load orders','error');}
+}
+
+function orderCardHTML(o,num,agents){
+  const left=daysLeft(o);const{used,total}=daysUsed(o);const pct=Math.round(used/total*100);const exp=left<=5;
+  const agentOpts=agents.map(a=>`<option value="${a.name}" ${o.agent===a.name?'selected':''}>${a.name}</option>`).join('');
+  return `<div class="order-card">
+    <div class="order-num">${num}</div>
+    <div class="order-main">
+      <div class="order-name">${o.name}</div>
+      <div class="order-phone">📞 ${o.phone}${o.email?' &nbsp;·&nbsp; 📧 '+o.email:''}</div>
+      <div class="order-address">📍 ${o.address}</div>
+      <span class="order-plan">${planEmoji(o.item)} ${o.item}</span>
+      ${o.type==='subscription'?`<div class="validity-wrap">
+        <div class="validity-label"><span>${fmtDate(o.startDate)} → ${fmtDate(o.endDate)}</span><span style="color:${exp?'var(--orange)':'var(--green)'};">${left} days left</span></div>
+        <div class="validity-track"><div class="validity-fill ${exp?'expiring':''}" style="width:${pct}%"></div></div>
+      </div>`:`<div style="font-size:0.73rem;color:var(--accent);margin-top:5px;font-weight:500;">📅 Delivery: ${fmtDate(o.startDate)}</div>`}
+    </div>
+    <div class="order-meta">
+      <div>
+        <div class="order-amount">₹${o.amount}</div>
+        <span class="badge ${exp?'badge-expiring':'badge-active'}" style="margin-top:5px;">${exp?'⚠️ Expiring':'✅ Active'}</span>
+      </div>
+      <div class="order-actions">
+        ${o.agent?`<span style="font-size:0.73rem;color:var(--accent);font-weight:600;">🛵 ${o.agent}</span><button class="btn btn-xs btn-ghost" onclick="unassignAgent('${o.id}')">✕</button>`
+        :`<div class="assign-wrap"><select class="assign-select" id="as_${o.id}"><option value="">Agent...</option>${agentOpts}</select><button class="btn btn-xs btn-primary" onclick="assignAgent('${o.id}')">Assign</button></div>`}
+        <a href="https://wa.me/91${o.phone.replace(/\D/g,'').slice(-10)}" target="_blank" class="btn btn-xs btn-green">💬</a>
+        <button class="btn btn-xs btn-red" onclick="deleteOrder('${o.id}')">Delete</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleArea(hdr){const l=hdr.nextElementSibling,t=hdr.querySelector('.area-toggle'),o=t.classList.contains('open');l.style.display=o?'none':'block';t.classList.toggle('open',!o);}
+async function assignAgent(id){const sel=document.getElementById('as_'+id);if(!sel||!sel.value)return toast('Please select an agent first','error');await fetch(`${API}/orders/${id}/assign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:sel.value})});toast('Agent assigned! 🛵');renderOrders();}
+async function unassignAgent(id){await fetch(`${API}/orders/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:''})});toast('Agent removed');renderOrders();}
+async function deleteOrder(id){if(!confirm('Permanently delete this order?'))return;await fetch(`${API}/orders/${id}`,{method:'DELETE'});toast('Order deleted');renderOrders();renderDashboard();}
+function filterByArea(area){showPage('orders',document.querySelectorAll('.nav-item')[1]);setTimeout(()=>{const dd=document.getElementById('orderArea');if(dd)dd.value=area;renderOrders();},50);}
+
+// ── TODAY ──
+async function renderToday(){
+  try{
+    document.getElementById('todayDateLabel').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const res=await fetch(`${API}/orders/today`);const data=await res.json();const orders=data.orders||[];
+    document.getElementById('todayCount').textContent=orders.length+' deliveries';
+    const areaMap=groupByArea(orders);
+    if(!Object.keys(areaMap).length){document.getElementById('todayContainer').innerHTML='<div class="empty-state"><span class="empty-icon">🎉</span><div class="empty-text">No deliveries today!</div></div>';return;}
+    let num=0;
+    document.getElementById('todayContainer').innerHTML=Object.entries(areaMap).map(([area,list])=>`
+      <div class="today-area-group">
+        <div class="today-area-hdr"><span class="today-area-name">📍 ${area}</span><span class="today-area-count">${list.length} delivery</span></div>
+        ${list.map(o=>{num++;return`<div class="schedule-item" id="sched_${o.id}">
+          <div class="sched-num">${num}</div>
+          <div class="sched-info">
+            <div class="sched-name">${o.name} <span style="font-size:.73rem;color:var(--muted);font-weight:400">· ${o.phone}</span></div>
+            <div class="sched-addr">📍 ${o.address}</div>
+            <div class="sched-item">${planEmoji(o.item)} ${o.item} · ₹${o.amount}</div>
+          </div>
+          <div class="sched-actions">
+            ${o.agent?`<span style="font-size:.73rem;color:var(--accent);font-weight:600;">🛵 ${o.agent}</span>`:`<span style="font-size:.71rem;color:var(--red);font-weight:600;">⚠️ No Agent</span>`}
+            <a href="https://wa.me/91${o.phone.replace(/\D/g,'').slice(-10)}" target="_blank" class="btn btn-xs btn-green">💬</a>
+            <button class="btn btn-xs btn-primary" onclick="markDone('${o.id}')">✅ Done</button>
+          </div>
+        </div>`;}).join('')}
+      </div>`).join('');
+  }catch(e){toast('Failed to load deliveries','error');}
+}
+
+async function markDone(id){
+  const el=document.getElementById('sched_'+id);
+  if(el){el.style.opacity='0.3';el.style.pointerEvents='none';}
+  await fetch(`${API}/orders/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({startDate:offset(-1),endDate:offset(-1)})});
+  toast('Delivery marked complete! ✅');
+}
+
+// ── AGENTS ──
+async function renderAgents(){
+  const agents=await fetchAgents();
+  document.getElementById('agentsGrid').innerHTML=agents.length?agents.map(a=>`
+    <div class="agent-card" style="${!a.active?'opacity:.5':''}">
+      <div class="agent-avatar">🛵</div>
+      <div class="agent-name">${a.name}</div>
+      <div class="agent-info">📞 ${a.phone}</div>
+      <div style="margin-top:6px;">${(a.areas||[]).map(ar=>`<span class="area-tag">📍 ${ar}</span>`).join('')}</div>
+      <div style="margin-top:10px;"><span class="badge ${a.active?'badge-active':'badge-expiring'}">${a.active?'✅ Active':'❌ Inactive'}</span></div>
+      <div class="agent-actions">
+        <button class="btn btn-sm btn-primary" onclick="editAgent('${a.id}')">✏️ Edit</button>
+        <button class="btn btn-sm ${a.active?'btn-red':'btn-green'}" onclick="toggleAgent('${a.id}',${!a.active})">${a.active?'Deactivate':'Activate'}</button>
+        <a href="https://wa.me/91${a.phone.replace(/\D/g,'').slice(-10)}" target="_blank" class="btn btn-sm btn-green">💬</a>
+      </div>
+    </div>`).join(''):
+    '<div class="empty-state" style="grid-column:1/-1"><span class="empty-icon">🛵</span><div class="empty-text">No agents added yet</div></div>';
+}
+
+function openAgentModal(pre){
+  document.getElementById('agentModalTitle').textContent=pre?'Edit Agent':'Add New Agent';
+  document.getElementById('ag_id').value=pre?.id||'';document.getElementById('ag_name').value=pre?.name||'';
+  document.getElementById('ag_phone').value=pre?.phone||'';document.getElementById('ag_areas').value=(pre?.areas||[]).join(', ');
+  document.getElementById('agentModal').classList.add('open');
+}
+async function editAgent(id){const agents=await fetchAgents();const a=agents.find(x=>x.id===id);if(a)openAgentModal(a);}
+async function saveAgent(){
+  const id=document.getElementById('ag_id').value,name=document.getElementById('ag_name').value.trim(),phone=document.getElementById('ag_phone').value.trim(),areas=document.getElementById('ag_areas').value.split(',').map(s=>s.trim()).filter(Boolean);
+  if(!name||!phone)return toast('Name and phone are required!','error');
+  if(id){await fetch(`${API}/agents/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,areas})});toast('Agent updated!');}
+  else{await fetch(`${API}/agents`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,areas})});toast('New agent added! 🛵');}
+  closeModal('agentModal');renderAgents();
+}
+async function toggleAgent(id,active){await fetch(`${API}/agents/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({active})});toast(active?'Agent activated!':'Agent deactivated');renderAgents();}
+
+// ── CUSTOMERS ──
+async function renderCustomers(){
+  const all=await fetchAllOrders();
+  const search=(document.getElementById('custSearch')?.value||'').toLowerCase();
+  const map={};
+  all.forEach(o=>{if(!map[o.phone])map[o.phone]={name:o.name,phone:o.phone,email:o.email||'',area:o.area||'',orders:[]};map[o.phone].orders.push(o);});
+  let custs=Object.values(map);
+  if(search)custs=custs.filter(c=>c.name.toLowerCase().includes(search)||c.phone.includes(search));
+  document.getElementById('customersGrid').innerHTML=custs.length?custs.map(c=>{
+    const active=c.orders.filter(isActive).length,spent=c.orders.reduce((s,o)=>s+o.amount,0);
+    return `<div class="customer-card">
+      <div class="cust-avatar">🙏</div>
+      <div class="cust-name">${c.name}</div>
+      <div class="cust-info">📞 ${c.phone}</div>
+      ${c.email?`<div class="cust-info">📧 ${c.email}</div>`:''}
+      ${c.area?`<div class="cust-info">📍 ${c.area}</div>`:''}
+      <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-weight:600;">Active</div><div style="font-family:'Libre Baskerville',serif;font-weight:700;color:var(--green);font-size:.95rem;">${active}</div></div>
+        <div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-weight:600;">Total</div><div style="font-family:'Libre Baskerville',serif;font-weight:700;color:var(--text);font-size:.95rem;">${c.orders.length}</div></div>
+        <div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-weight:600;">Spent</div><div style="font-family:'Libre Baskerville',serif;font-weight:700;color:var(--accent);font-size:.95rem;">₹${spent}</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <a href="https://wa.me/91${c.phone.replace(/\D/g,'').slice(-10)}" target="_blank" class="btn btn-sm btn-green">💬 WhatsApp</a>
+        <button class="btn btn-sm btn-ghost" onclick="goToOrders('${c.phone}')">📦 Orders</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty-state" style="grid-column:1/-1"><span class="empty-icon">👥</span><div class="empty-text">No customers found</div></div>';
+}
+function goToOrders(phone){showPage('orders',document.querySelectorAll('.nav-item')[1]);setTimeout(()=>{document.getElementById('orderSearch').value=phone;renderOrders();},50);}
+
+// ── ADD ORDER ──
+function openAddOrderModal(){
+  ['ao_name','ao_phone','ao_email','ao_area'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ao_address').value='';document.getElementById('ao_plan').value='';document.getElementById('ao_start').value=todayStr();
+  document.getElementById('addOrderModal').classList.add('open');
+}
+async function addOrder(){
+  const name=document.getElementById('ao_name').value.trim(),phone=document.getElementById('ao_phone').value.trim(),addr=document.getElementById('ao_address').value.trim(),area=document.getElementById('ao_area').value.trim(),planV=document.getElementById('ao_plan').value,email=document.getElementById('ao_email').value.trim(),start=document.getElementById('ao_start').value;
+  if(!name||!phone||!addr||!planV||!start)return toast('Please fill all required fields!','error');
+  const[item,amtStr,type,days]=planV.split('|');
+  const res=await fetch(`${API}/orders`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,email,address:addr,item,amount:parseInt(amtStr),type,startDate:start})});
+  const data=await res.json();
+  if(!res.ok){
+    const forceRes=await fetch(`${API}/orders`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,email,address:addr+', '+(area||'Vikaspuri'),item,amount:parseInt(amtStr),type,startDate:start})});
+    const forceData=await forceRes.json();
+    if(!forceRes.ok)return toast(forceData.error||'An error occurred','error');
+  }
+  closeModal('addOrderModal');renderOrders();renderDashboard();
+  toast('Order added successfully! 📦');
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');}));
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+setInterval(()=>{const p=document.querySelector('.page.active')?.id?.replace('page-','');if(p&&p!=='export')loadPage(p);},30000);
+function loadPage(name){if(name==='dashboard')renderDashboard();if(name==='orders')renderOrders();if(name==='today')renderToday();if(name==='agents')renderAgents();if(name==='customers')renderCustomers();if(name==='websettings')renderWebSettings();}
+
+// ══════════════════════════════════════
+// ══ EXPORT FILTER INIT ══
+// ══════════════════════════════════════
+async function initExportFilters(){
+  const allOrders=await fetchAllOrders();
+  const agents=await fetchAgents();
+  const areas=[...new Set(allOrders.map(o=>o.area||'Other'))].sort();
+  const agentNames=[...new Set(allOrders.map(o=>o.agent).filter(Boolean))].sort();
+
+  // Populate all area dropdowns
+  ['exp_ord_area','exp_all_area','exp_del_area','exp_cust_area'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(sel&&sel.options.length<=1){
+      areas.forEach(a=>{const opt=document.createElement('option');opt.value=a;opt.textContent=a;sel.appendChild(opt);});
+    }
+  });
+
+  // Populate agent dropdowns
+  ['exp_ord_agent','exp_del_agent'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(sel&&sel.options.length<=1){
+      agentNames.forEach(a=>{const opt=document.createElement('option');opt.value=a;opt.textContent=a;sel.appendChild(opt);});
+      agents.forEach(a=>{if(!agentNames.includes(a.name)){const opt=document.createElement('option');opt.value=a.name;opt.textContent=a.name;sel.appendChild(opt);}});
+    }
+  });
+
+  // Set today as default delivery date
+  const delDate=document.getElementById('exp_del_date');
+  if(delDate&&!delDate.value)delDate.value=todayStr();
+}
+
+// ══════════════════════════════════════
+// ══ EXCEL HELPER ══
+// ══════════════════════════════════════
+function downloadExcel(sheets,fileName){
+  const wb=XLSX.utils.book_new();
+  sheets.forEach(({name,data})=>{
+    if(!data.length)return;
+    const ws=XLSX.utils.json_to_sheet(data);
+    const cols=Object.keys(data[0]).map(k=>({wch:Math.max(k.length+2,16)}));
+    ws['!cols']=cols;
+    XLSX.utils.book_append_sheet(wb,ws,name);
+  });
+  XLSX.writeFile(wb,fileName);
+  toast(`Downloaded: ${fileName}`);
+}
+
+function inRange(dateStr,from,to){
+  if(!dateStr)return true;
+  if(from&&dateStr<from)return false;
+  if(to&&dateStr>to)return false;
+  return true;
+}
+
+// ══ 1. ACTIVE ORDERS (filtered) ══
+async function exportFilteredOrders(){
+  try{
+    let orders=await fetchOrders();
+    const from=document.getElementById('exp_ord_from').value;
+    const to=document.getElementById('exp_ord_to').value;
+    const area=document.getElementById('exp_ord_area').value;
+    const plan=document.getElementById('exp_ord_plan').value;
+    const agent=document.getElementById('exp_ord_agent').value;
+    const status=document.getElementById('exp_ord_status').value;
+
+    if(from||to)orders=orders.filter(o=>inRange(o.startDate,from,to)||inRange(o.bookingDate,from,to));
+    if(area)orders=orders.filter(o=>o.area===area);
+    if(plan)orders=orders.filter(o=>o.item===plan);
+    if(agent)orders=orders.filter(o=>o.agent===agent);
+    if(status==='expiring')orders=orders.filter(o=>daysLeft(o)<=5);
+
+    if(!orders.length)return toast('No orders match the selected filters','error');
+
+    const data=orders.map(o=>({
+      'Order ID':o.id,
+      'Customer Name':o.name,
+      'Phone':o.phone,
+      'Email':o.email||'',
+      'Address':o.address,
+      'Area':o.area||'',
+      'Plan':o.item,
+      'Amount (₹)':o.amount,
+      'Type':o.type==='subscription'?'Monthly':'One-time',
+      'Start Date':o.startDate,
+      'End Date':o.endDate||'',
+      'Days Left':o.type==='subscription'?daysLeft(o):'N/A',
+      'Agent':o.agent||'Not Assigned',
+      'Payment Status':o.payment_status||'',
+      'Booking Date':o.bookingDate||''
+    }));
+
+    const today=new Date().toISOString().split('T')[0];
+    const label=[area,plan,agent,status].filter(Boolean).join('_')||'All';
+    downloadExcel([{name:'Active Orders',data}],`Active_Orders_${label}_${today}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+// ══ 2. ALL ORDERS HISTORY (filtered) ══
+async function exportAllOrdersFiltered(){
+  try{
+    let orders=await fetchAllOrders();
+    const from=document.getElementById('exp_all_from').value;
+    const to=document.getElementById('exp_all_to').value;
+    const area=document.getElementById('exp_all_area').value;
+    const plan=document.getElementById('exp_all_plan').value;
+    const pay=document.getElementById('exp_all_pay').value;
+
+    if(from||to)orders=orders.filter(o=>inRange(o.bookingDate||o.startDate,from,to));
+    if(area)orders=orders.filter(o=>o.area===area);
+    if(plan)orders=orders.filter(o=>o.item===plan);
+    if(pay)orders=orders.filter(o=>o.payment_status===pay);
+
+    if(!orders.length)return toast('No orders match the selected filters','error');
+
+    const data=orders.map(o=>({
+      'Order ID':o.id,'Customer':o.name,'Phone':o.phone,'Email':o.email||'',
+      'Address':o.address,'Area':o.area||'','Plan':o.item,'Amount (₹)':o.amount,
+      'Type':o.type==='subscription'?'Monthly':'One-time',
+      'Status':isActive(o)?'Active':'Expired',
+      'Start Date':o.startDate,'End Date':o.endDate||'',
+      'Booking Date':o.bookingDate||'',
+      'Agent':o.agent||'','Payment':o.payment_status||'',
+      'Razorpay Order ID':o.razorpay_order_id||'',
+      'Razorpay Payment ID':o.razorpay_payment_id||''
+    }));
+
+    const today=new Date().toISOString().split('T')[0];
+    downloadExcel([{name:'Order History',data}],`Order_History_${today}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+// ══ 3. DELIVERY SCHEDULE (any date + filtered) ══
+async function exportDeliverySchedule(){
+  try{
+    const date=document.getElementById('exp_del_date').value||todayStr();
+    const area=document.getElementById('exp_del_area').value;
+    const agent=document.getElementById('exp_del_agent').value;
+
+    let orders=await fetchAllOrders();
+    orders=orders.filter(o=>isActive(o));
+    orders=orders.filter(o=>{
+      if(o.type==='one_time')return(o.deliveryDate||o.startDate)===date;
+      return true;
+    });
+    if(area)orders=orders.filter(o=>o.area===area);
+    if(agent)orders=orders.filter(o=>o.agent===agent);
+
+    if(!orders.length)return toast('No deliveries found for selected filters','error');
+
+    let num=0;
+    const data=orders.map(o=>{num++;return{
+      'S.No':num,'Customer':o.name,'Phone':o.phone,
+      'Address':o.address,'Area':o.area||'',
+      'Plan':o.item,'Amount (₹)':o.amount,
+      'Agent':o.agent||'Not Assigned',
+      'WhatsApp':`https://wa.me/91${o.phone.replace(/\D/g,'').slice(-10)}`,
+      'Date':date
+    };});
+
+    downloadExcel([{name:'Delivery Schedule',data}],`Delivery_${date}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+// ══ 4. CUSTOMERS (filtered) ══
+async function exportCustomersFiltered(){
+  try{
+    const all=await fetchAllOrders();
+    const areaFilter=document.getElementById('exp_cust_area').value;
+    const activeFilter=document.getElementById('exp_cust_active').value;
+    const map={};
+    all.forEach(o=>{if(!map[o.phone])map[o.phone]={name:o.name,phone:o.phone,email:o.email||'',area:o.area||'',orders:[]};map[o.phone].orders.push(o);});
+    let custs=Object.values(map);
+    if(areaFilter)custs=custs.filter(c=>c.area===areaFilter);
+    if(activeFilter==='yes')custs=custs.filter(c=>c.orders.some(isActive));
+    if(activeFilter==='no')custs=custs.filter(c=>!c.orders.some(isActive));
+    if(!custs.length)return toast('No customers match the selected filters','error');
+    const data=custs.map(c=>({
+      'Customer Name':c.name,'Phone':c.phone,'Email':c.email,'Area':c.area,
+      'Total Orders':c.orders.length,'Active Orders':c.orders.filter(isActive).length,
+      'Total Spent (₹)':c.orders.reduce((s,o)=>s+o.amount,0),
+      'Plans Used':[...new Set(c.orders.map(o=>o.item))].join(', '),
+      'Last Order':c.orders.slice(-1)[0]?.bookingDate||''
+    }));
+    const today=new Date().toISOString().split('T')[0];
+    downloadExcel([{name:'Customers',data}],`Customers_${today}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+// ══ 5. REVENUE (filtered) ══
+async function exportRevenueFiltered(){
+  try{
+    let orders=await fetchAllOrders();
+    const from=document.getElementById('exp_rev_from').value;
+    const to=document.getElementById('exp_rev_to').value;
+    const plan=document.getElementById('exp_rev_plan').value;
+    if(from||to)orders=orders.filter(o=>inRange(o.bookingDate||o.startDate,from,to));
+    if(plan)orders=orders.filter(o=>o.item===plan);
+    if(!orders.length)return toast('No revenue data for selected filters','error');
+    const data=orders.map(o=>({'Order ID':o.id,'Customer':o.name,'Phone':o.phone,'Plan':o.item,'Amount (₹)':o.amount,'Booking Date':o.bookingDate||o.startDate,'Payment Status':o.payment_status||'','Razorpay Order ID':o.razorpay_order_id||'','Razorpay Payment ID':o.razorpay_payment_id||''}));
+    const total=orders.reduce((s,o)=>s+o.amount,0);
+    data.push({'Order ID':'TOTAL','Customer':'','Phone':'','Plan':'','Amount (₹)':total,'Booking Date':'','Payment Status':'','Razorpay Order ID':'','Razorpay Payment ID':''});
+    const today=new Date().toISOString().split('T')[0];
+    downloadExcel([{name:'Revenue',data}],`Revenue_Report_${today}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+// ══ 6. AGENTS (filtered) ══
+async function exportAgentsFiltered(){
+  try{
+    let agents=await fetchAgents();
+    const statusF=document.getElementById('exp_agent_status').value;
+    if(statusF==='active')agents=agents.filter(a=>a.active);
+    if(statusF==='inactive')agents=agents.filter(a=>!a.active);
+    if(!agents.length)return toast('No agents match the selected filters','error');
+    const data=agents.map(a=>({'Agent Name':a.name,'Phone':a.phone,'WhatsApp':`https://wa.me/91${a.phone.replace(/\D/g,'').slice(-10)}`,'Delivery Areas':(a.areas||[]).join(', '),'Status':a.active?'Active':'Inactive','Date Joined':a.joined?new Date(a.joined).toLocaleDateString('en-IN'):''}));
+    const today=new Date().toISOString().split('T')[0];
+    downloadExcel([{name:'Agents',data}],`Delivery_Agents_${today}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+// ══ FULL REPORT (5 sheets) ══
+async function exportFullReport(){
+  try{
+    const[active,all,agents]=await Promise.all([fetchOrders(),fetchAllOrders(),fetchAgents()]);
+    const today=new Date().toISOString().split('T')[0];
+
+    const s1=active.map(o=>({'Order ID':o.id,'Name':o.name,'Phone':o.phone,'Address':o.address,'Area':o.area||'','Plan':o.item,'Amount':o.amount,'Start':o.startDate,'End':o.endDate||'','Days Left':daysLeft(o),'Agent':o.agent||''}));
+    const s2=all.map(o=>({'ID':o.id,'Name':o.name,'Phone':o.phone,'Plan':o.item,'Amount':o.amount,'Status':isActive(o)?'Active':'Expired','Booking Date':o.bookingDate||'','Payment':o.payment_status||''}));
+    const map={};all.forEach(o=>{if(!map[o.phone])map[o.phone]={name:o.name,phone:o.phone,email:o.email||'',area:o.area||'',orders:[]};map[o.phone].orders.push(o);});
+    const s3=Object.values(map).map(c=>({'Name':c.name,'Phone':c.phone,'Email':c.email,'Area':c.area,'Total':c.orders.length,'Active':c.orders.filter(isActive).length,'Spent':c.orders.reduce((s,o)=>s+o.amount,0)}));
+    const s4=all.map(o=>({'ID':o.id,'Name':o.name,'Plan':o.item,'Amount':o.amount,'Date':o.bookingDate||'','Status':o.payment_status||''}));
+    s4.push({'ID':'TOTAL','Name':'','Plan':'','Amount':all.reduce((s,o)=>s+o.amount,0),'Date':'','Status':''});
+    const s5=agents.map(a=>({'Name':a.name,'Phone':a.phone,'Areas':(a.areas||[]).join(', '),'Status':a.active?'Active':'Inactive'}));
+
+    downloadExcel([
+      {name:'Active Orders',data:s1},
+      {name:'Order History',data:s2},
+      {name:'Customers',data:s3},
+      {name:'Revenue',data:s4},
+      {name:'Agents',data:s5}
+    ],`Riddhi_Siddhi_Full_Report_${today}.xlsx`);
+  }catch(e){toast('Export failed','error');}
+}
+
+
+// ════════════════════════════════════════
+// ══ WEBSITE SETTINGS ══
+// ════════════════════════════════════════
+let wsData = null;
+
+async function renderWebSettings() {
+  const container = document.getElementById('webSettingsContent');
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">⏳ Loading settings...</div>';
+  try {
+    const res = await fetch('/api/site-settings');
+    const d = await res.json();
+    wsData = d.settings;
+    renderWsUI();
+  } catch(e) { container.innerHTML = '<div style="color:red;padding:20px;">Failed to load settings</div>'; }
+}
+
+function wsInput(id, val, type='text', extraStyle='') {
+  return `<input type="${type}" id="${id}" value="${String(val).replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.84rem;color:var(--text);outline:none;box-sizing:border-box;${extraStyle}">`;
+}
+function wsLabel(text) {
+  return `<label style="display:block;font-size:0.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#374151;margin-bottom:5px;">${text}</label>`;
+}
+function wsCard(title, body, saveBtn) {
+  return `<div style="background:var(--white);border-radius:14px;border:1px solid var(--border);padding:22px;box-shadow:var(--shadow);">
+    <div style="font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.97rem;color:var(--text);margin-bottom:16px;">${title}</div>
+    ${body}
+    ${saveBtn}
+  </div>`;
+}
+function wsSaveBtn(fn, label='💾 Save Changes') {
+  return `<button onclick="${fn}()" class="btn btn-primary" style="margin-top:16px;padding:9px 22px;">${label}</button>`;
+}
+
+function renderWsUI() {
+  const s = wsData;
+  const c = document.getElementById('webSettingsContent');
+
+  // ── Contact & Business ──
+  const bizHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>${wsLabel('Business Name')}${wsInput('ws_bizname', s.businessName||'')}</div>
+      <div>${wsLabel('Tagline')}${wsInput('ws_tagline', s.tagline||'')}</div>
+      <div>${wsLabel('📞 Phone Number (shown on site)')}${wsInput('ws_phone', s.phone||'')}</div>
+      <div>${wsLabel('💬 WhatsApp Number (with country code, e.g. 918923471161)')}${wsInput('ws_whatsapp', s.whatsapp||'')}</div>
+      <div style="grid-column:1/-1;">${wsLabel('Footer Description')}${wsInput('ws_footerabout', s.footerAbout||'')}</div>
+    </div>`;
+
+  // ── Plans ──
+  const plansHTML = (s.plans||[]).map((p,i) => `
+    <div style="border:1.5px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:14px;">
+      <div style="font-weight:700;font-size:0.82rem;color:var(--primary);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;">${p.icon||''} ${p.badge||p.name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>${wsLabel('Plan Name')}${wsInput('ws_pname_'+i, p.name)}</div>
+        <div>${wsLabel('Price ₹/month')}${wsInput('ws_pprice_'+i, p.price, 'number')}</div>
+        <div>${wsLabel('Tagline')}${wsInput('ws_ptagline_'+i, p.tagline||'')}</div>
+      </div>
+      <div>${wsLabel('Features (one per line — each becomes a bullet point)')}
+        <textarea id="ws_pfeatures_${i}" rows="4" style="width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.83rem;color:var(--text);outline:none;resize:vertical;box-sizing:border-box;">${(p.features||[]).join('\n')}</textarea>
+      </div>
+    </div>`).join('');
+
+  // ── Specific Items ──
+  const itemsHTML = (s.specificItems||[]).map((item,i) => `
+    <div style="display:grid;grid-template-columns:55px 1fr 160px;gap:10px;align-items:end;background:var(--bg);padding:13px;border-radius:10px;border:1.5px solid var(--border2);margin-bottom:10px;">
+      <div>${wsLabel('Emoji')}${wsInput('ws_iemoji_'+i, item.emoji||'', 'text', 'text-align:center;font-size:1.1rem;')}</div>
+      <div>${wsLabel('Item Name')}${wsInput('ws_iname_'+i, item.name)}</div>
+      <div>${wsLabel('Price per item (₹)')}${wsInput('ws_iprice_'+i, item.price, 'number')}</div>
+    </div>`).join('');
+
+  // ── Testimonials ──
+  const testiHTML = (s.testimonials||[]).map((t,i) => `
+    <div style="border:1.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:12px;">
+      <div style="font-weight:700;font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Review ${i+1}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 60px;gap:10px;margin-bottom:8px;">
+        <div>${wsLabel('Customer Name')}${wsInput('ws_tname_'+i, t.name)}</div>
+        <div>${wsLabel('Label (e.g. Premium Member)')}${wsInput('ws_tloc_'+i, t.loc||'')}</div>
+        <div>${wsLabel('Avatar')}${wsInput('ws_tavatar_'+i, t.avatar||'🙏', 'text', 'text-align:center;font-size:1.1rem;')}</div>
+      </div>
+      <div>${wsLabel('Review Text')}
+        <textarea id="ws_ttext_${i}" rows="2" style="width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.83rem;color:var(--text);outline:none;resize:vertical;box-sizing:border-box;">${t.text||''}</textarea>
+      </div>
+      <button onclick="deleteTestimonial(${i})" style="margin-top:8px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:7px;padding:5px 12px;font-size:0.75rem;font-weight:600;cursor:pointer;">🗑 Remove</button>
+    </div>`).join('');
+
+  c.innerHTML = `<div style="display:grid;gap:18px;max-width:920px;">
+    ${wsCard('🏪 Business & Contact Info', bizHTML, wsSaveBtn('saveBusinessInfo'))}
+    ${wsCard('📦 Monthly Plans — Name, Price & Features', plansHTML, wsSaveBtn('savePlans'))}
+    ${wsCard('🌺 Specific Day Items', itemsHTML, wsSaveBtn('saveSpecificItems'))}
+    <div style="background:var(--white);border-radius:14px;border:1px solid var(--border);padding:22px;box-shadow:var(--shadow);">
+      <div style="font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.97rem;color:var(--text);margin-bottom:16px;">⭐ Customer Reviews</div>
+      <div id="ws_testi_list">${testiHTML}</div>
+      <button onclick="addTestimonial()" style="margin-top:4px;background:var(--primary-light);color:var(--primary);border:1.5px solid #C7D2FE;border-radius:8px;padding:8px 18px;font-size:0.82rem;font-weight:600;cursor:pointer;">+ Add Review</button>
+      ${wsSaveBtn('saveTestimonials')}
+    </div>
+  </div>`;
+}
+
+async function saveBusinessInfo() {
+  const patch = {
+    businessName: document.getElementById('ws_bizname').value.trim(),
+    tagline: document.getElementById('ws_tagline').value.trim(),
+    phone: document.getElementById('ws_phone').value.trim(),
+    whatsapp: document.getElementById('ws_whatsapp').value.trim(),
+    footerAbout: document.getElementById('ws_footerabout').value.trim()
+  };
+  const res = await fetch('/api/site-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(patch)});
+  const data = await res.json();
+  if(data.success){wsData=data.settings;toast('Business info saved! ✅');}
+  else toast(data.error||'Save failed','error');
+}
+
+async function savePlans() {
+  const plans = (wsData.plans||[]).map((p,i) => ({
+    ...p,
+    name: document.getElementById('ws_pname_'+i)?.value?.trim()||p.name,
+    price: parseInt(document.getElementById('ws_pprice_'+i)?.value)||p.price,
+    tagline: document.getElementById('ws_ptagline_'+i)?.value?.trim()||p.tagline,
+    features: (document.getElementById('ws_pfeatures_'+i)?.value||'').split('\n').map(s=>s.trim()).filter(Boolean)
+  }));
+  const res = await fetch('/api/site-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({plans})});
+  const data = await res.json();
+  if(data.success){wsData=data.settings;toast('Plans saved! ✅');renderWsUI();}
+  else toast(data.error||'Save failed','error');
+}
+
+async function saveSpecificItems() {
+  const specificItems = (wsData.specificItems||[]).map((item,i) => ({
+    ...item,
+    emoji: document.getElementById('ws_iemoji_'+i)?.value||item.emoji,
+    name: document.getElementById('ws_iname_'+i)?.value?.trim()||item.name,
+    price: parseInt(document.getElementById('ws_iprice_'+i)?.value)||item.price
+  }));
+  const res = await fetch('/api/site-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({specificItems})});
+  const data = await res.json();
+  if(data.success){wsData=data.settings;toast('Items saved! ✅');renderWsUI();}
+  else toast(data.error||'Save failed','error');
+}
+
+async function saveTestimonials() {
+  const testimonials = (wsData.testimonials||[]).map((t,i) => ({
+    text: document.getElementById('ws_ttext_'+i)?.value?.trim()||t.text,
+    name: document.getElementById('ws_tname_'+i)?.value?.trim()||t.name,
+    loc: document.getElementById('ws_tloc_'+i)?.value?.trim()||t.loc,
+    avatar: document.getElementById('ws_tavatar_'+i)?.value||t.avatar
+  }));
+  const res = await fetch('/api/site-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({testimonials})});
+  const data = await res.json();
+  if(data.success){wsData=data.settings;toast('Reviews saved! ✅');renderWsUI();}
+  else toast(data.error||'Save failed','error');
+}
+
+function addTestimonial() {
+  if(!wsData.testimonials) wsData.testimonials=[];
+  wsData.testimonials.push({text:'',name:'New Customer',loc:'Member',avatar:'🙏'});
+  renderWsUI();
+  // Scroll to last one
+  const list = document.getElementById('ws_testi_list');
+  if(list) list.lastElementChild?.scrollIntoView({behavior:'smooth'});
+}
+
+function deleteTestimonial(i) {
+  if(!confirm('Remove this review?')) return;
+  wsData.testimonials.splice(i,1);
+  renderWsUI();
+}
+
+// ── INIT: Check role & show nav ──
+let currentAdminRole='';
+async function initAdmin(){
+  try{
+    const res=await fetch('/api/auth/check');
+    const data=await res.json();
+    if(!data.loggedIn){window.location.href='/login';return;}
+    currentAdminRole=data.role;
+    if(data.role==='owner') document.getElementById('owner-nav').style.display='block';
+    else document.getElementById('staff-nav').style.display='block';
+    const nameEl=document.querySelector('.admin-name');
+    if(nameEl)nameEl.textContent=data.name||'Admin';
+    const roleEl=document.querySelector('.admin-role');
+    if(roleEl)roleEl.textContent=data.role==='owner'?'👑 Owner':'👤 Staff';
+    renderDashboard();
+  }catch(e){window.location.href='/login';}
+}
+
+// ── MANAGE ADMINS ──
+async function renderAdmins(){
+  if(currentAdminRole && currentAdminRole!=='owner'){toast('Owner access required','error');return;}
+  if(!currentAdminRole){
+    // Role not yet loaded, fetch it
+    try{const r=await fetch('/api/auth/check');const d=await r.json();currentAdminRole=d.role||'';}catch(e){}
+    if(currentAdminRole!=='owner'){toast('Owner access required','error');return;}
+  }
+  try{
+    const res=await fetch('/api/admins');
+    const data=await res.json();
+    const admins=data.admins||[];
+    const grid=document.getElementById('adminsGrid');
+    if(!admins.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><span class="empty-icon">🔐</span><div class="empty-text">No admins found</div></div>';return;}
+    grid.innerHTML=admins.map(a=>`
+      <div style="background:var(--white);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${a.role==='owner'?'linear-gradient(90deg,#4338CA,#6366F1)':'linear-gradient(90deg,#059669,#10B981)'};"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div style="width:42px;height:42px;border-radius:10px;background:${a.role==='owner'?'linear-gradient(135deg,#4338CA,#6366F1)':'linear-gradient(135deg,#059669,#10B981)'};display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">${a.role==='owner'?'👑':'👤'}</div>
+          <div>
+            <div style="font-family:'Libre Baskerville',serif;font-weight:700;font-size:0.92rem;color:var(--text);">${a.name}</div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:1px;">@${a.username}</div>
+          </div>
+        </div>
+        ${a.email?`<div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px;">📧 ${a.email}</div>`:''}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <span style="font-size:0.68rem;padding:3px 9px;border-radius:20px;font-weight:700;background:${a.role==='owner'?'#EEF2FF':'#ECFDF5'};color:${a.role==='owner'?'#4338CA':'#059669'};">${a.role==='owner'?'👑 Owner':'👤 Staff'}</span>
+          <span style="font-size:0.68rem;padding:3px 9px;border-radius:20px;font-weight:700;background:${a.active?'#ECFDF5':'#FEF2F2'};color:${a.active?'#059669':'#DC2626'};">${a.active?'✅ Active':'❌ Inactive'}</span>
+        </div>
+        ${a.lastLogin?`<div style="font-size:0.68rem;color:var(--muted);margin-bottom:12px;">Last login: ${new Date(a.lastLogin).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>`:''}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" onclick="editAdmin('${a.id}')">✏️ Edit</button>
+          <button class="btn btn-sm" style="background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;" onclick="openResetPass('${a.id}','${a.name}')">🔑 Reset Pass</button>
+          <button class="btn btn-sm ${a.active?'btn-red':'btn-green'}" onclick="toggleAdmin('${a.id}',${!a.active})">${a.active?'Deactivate':'Activate'}</button>
+        </div>
+      </div>`).join('');
+  }catch(e){toast('Failed to load admins','error');}
+}
+
+function openAddAdminModal(){
+  document.getElementById('adminModalTitle').textContent='Add New Admin';
+  document.getElementById('adm_id').value='';
+  document.getElementById('adm_name').value='';
+  document.getElementById('adm_username').value='';
+  document.getElementById('adm_username').disabled=false;
+  document.getElementById('adm_password').value='';
+  document.getElementById('adm_pass_label').textContent='(min. 6 characters)';
+  document.getElementById('adm_email').value='';
+  document.getElementById('adm_role').value='staff';
+  document.getElementById('addAdminModal').classList.add('open');
+}
+
+async function editAdmin(id){
+  try{
+    const res=await fetch('/api/admins');
+    const data=await res.json();
+    const a=data.admins.find(x=>x.id===id);
+    if(!a)return;
+    document.getElementById('adminModalTitle').textContent='Edit Admin';
+    document.getElementById('adm_id').value=a.id;
+    document.getElementById('adm_name').value=a.name;
+    document.getElementById('adm_username').value=a.username;
+    document.getElementById('adm_username').disabled=true;
+    document.getElementById('adm_password').value='';
+    document.getElementById('adm_pass_label').textContent='(leave blank to keep current)';
+    document.getElementById('adm_email').value=a.email||'';
+    document.getElementById('adm_role').value=a.role;
+    document.getElementById('addAdminModal').classList.add('open');
+  }catch(e){toast('Failed to load admin','error');}
+}
+
+async function saveAdmin(){
+  const id=document.getElementById('adm_id').value;
+  const name=document.getElementById('adm_name').value.trim();
+  const username=document.getElementById('adm_username').value.trim();
+  const password=document.getElementById('adm_password').value;
+  const email=document.getElementById('adm_email').value.trim();
+  const role=document.getElementById('adm_role').value;
+  if(!name)return toast('Name is required','error');
+  if(!id&&!username)return toast('Username is required','error');
+  if(!id&&(!password||password.length<6))return toast('Password must be at least 6 characters','error');
+  if(id){
+    const updates={name,email,role};
+    if(password&&password.length>=6)updates.password=password;
+    const res=await fetch(`/api/admins/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)});
+    const data=await res.json();
+    if(data.success){toast('Admin updated! ✅');closeModal('addAdminModal');renderAdmins();}
+    else toast(data.error||'Update failed','error');
+  }else{
+    const res=await fetch('/api/admins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,username,password,email,role})});
+    const data=await res.json();
+    if(data.success){toast('New admin added! 🔐');closeModal('addAdminModal');renderAdmins();}
+    else toast(data.error||'Failed to add admin','error');
+  }
+}
+
+async function toggleAdmin(id,active){
+  const res=await fetch(`/api/admins/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({active})});
+  const data=await res.json();
+  if(data.success){toast(active?'Admin activated! ✅':'Admin deactivated');renderAdmins();}
+  else toast(data.error||'Failed','error');
+}
+
+function openResetPass(id,name){
+  document.getElementById('rp_admin_id').value=id;
+  document.getElementById('rp_admin_name').textContent=name;
+  document.getElementById('rp_password').value='';
+  document.getElementById('rp_confirm').value='';
+  document.getElementById('rp-error').style.display='none';
+  document.getElementById('resetPassModal').classList.add('open');
+}
+
+async function doResetAdminPass(){
+  const id=document.getElementById('rp_admin_id').value;
+  const pwd=document.getElementById('rp_password').value;
+  const confirm=document.getElementById('rp_confirm').value;
+  const errEl=document.getElementById('rp-error');
+  errEl.style.display='none';
+  if(!pwd||pwd.length<6){errEl.textContent='Password must be at least 6 characters';errEl.style.display='block';return;}
+  if(pwd!==confirm){errEl.textContent='Passwords do not match';errEl.style.display='block';return;}
+  const res=await fetch(`/api/admins/${id}/reset-password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({newPassword:pwd})});
+  const data=await res.json();
+  if(data.success){toast('Password reset! 🔒');closeModal('resetPassModal');}
+  else{errEl.textContent=data.error||'Reset failed';errEl.style.display='block';}
+}
+
+// ── CHANGE OWN PASSWORD ──
+async function changePassword(){
+  const current=document.getElementById('cp_current').value;
+  const newPass=document.getElementById('cp_new').value;
+  const confirm=document.getElementById('cp_confirm').value;
+  const errEl=document.getElementById('cp-error');
+  const sucEl=document.getElementById('cp-success');
+  errEl.style.display='none';sucEl.style.display='none';
+  if(!current||!newPass||!confirm){errEl.textContent='All fields are required';errEl.style.display='block';return;}
+  if(newPass.length<6){errEl.textContent='New password must be at least 6 characters';errEl.style.display='block';return;}
+  if(newPass!==confirm){errEl.textContent='Passwords do not match';errEl.style.display='block';return;}
+  const res=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword:current,newPassword:newPass})});
+  const data=await res.json();
+  if(data.success){
+    sucEl.textContent='✅ Password changed successfully!';sucEl.style.display='block';
+    document.getElementById('cp_current').value='';
+    document.getElementById('cp_new').value='';
+    document.getElementById('cp_confirm').value='';
+  }else{errEl.textContent=data.error||'Failed';errEl.style.display='block';}
+}
+
+initAdmin();
+</script>
+</body>
+</html>
