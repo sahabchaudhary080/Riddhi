@@ -349,6 +349,11 @@ h1,h2,h3,.serif{font-family:'Libre Baskerville',serif;}
         <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Print</button>
       </div>
     </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+      <label style="font-size:0.75rem;font-weight:700;color:#1F2937;text-transform:uppercase;letter-spacing:.06em;">📅 Select Date:</label>
+      <input type="date" id="deliveryDatePicker" style="padding:8px 13px;background:var(--white);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;" onchange="renderToday()">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('deliveryDatePicker').value=todayStr();renderToday()">🔄 Today</button>
+    </div>
     <div id="todayContainer"></div>
   </div>
 
@@ -847,8 +852,17 @@ function filterByArea(area){showPage('orders',document.querySelectorAll('.nav-it
 // ── TODAY ──
 async function renderToday(){
   try{
-    document.getElementById('todayDateLabel').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    const res=await fetch(`${API}/orders/today`);const data=await res.json();const orders=data.orders||[];
+    const picker=document.getElementById('deliveryDatePicker');
+    if(!picker.value)picker.value=todayStr();
+    const selectedDate=picker.value;
+    const dateObj=new Date(selectedDate+'T00:00:00');
+    document.getElementById('todayDateLabel').textContent=dateObj.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const allRes=await fetch(`${API}/orders/active`);const allData=await allRes.json();
+    const allOrders=allData.orders||[];
+    const orders=allOrders.filter(o=>{
+      if(o.type==='one_time') return (o.deliveryDate||o.startDate)===selectedDate;
+      return o.startDate<=selectedDate && o.endDate>=selectedDate;
+    });
     document.getElementById('todayCount').textContent=orders.length+' deliveries';
     const areaMap=groupByArea(orders);
     if(!Object.keys(areaMap).length){document.getElementById('todayContainer').innerHTML='<div class="empty-state"><span class="empty-icon">🎉</span><div class="empty-text">No deliveries today!</div></div>';return;}
