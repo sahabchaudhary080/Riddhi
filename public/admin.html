@@ -780,6 +780,7 @@ async function renderDashboard(){
 async function renderOrders(){
   try{
     let orders=await fetchOrders();
+    orders=orders.filter(o=>o.payment_status==='confirmed'); // ✅ FIX: Sirf confirmed orders dikhao
     const agents=await fetchAgents();
     const search=(document.getElementById('orderSearch')?.value||'').toLowerCase();
     const area=document.getElementById('orderArea')?.value||'';
