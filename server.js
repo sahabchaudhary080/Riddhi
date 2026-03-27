@@ -580,8 +580,8 @@ app.get('/api/orders/check/:phone', (req, res) => {
 // ════════════════════════════════════════
 
 app.get('/api/orders',             requireApiAuth, (req, res) => res.json({ success: true, orders: db.get('orders').value() }));
-app.get('/api/orders/active',      requireApiAuth, (req, res) => res.json({ success: true, orders: db.get('orders').value().filter(isActive) }));
-app.get('/api/orders/today',       requireApiAuth, (req, res) => { const t = todayStr(); res.json({ success: true, orders: db.get('orders').value().filter(o => isActive(o) && (o.type==='one_time'?(o.deliveryDate||o.startDate)===t:true)) }); });
+app.get('/api/orders/active',      requireApiAuth, (req, res) => res.json({ success: true, orders: db.get('orders').value().filter(o => isActive(o) && o.payment_status === 'confirmed') }));
+app.get('/api/orders/today',       requireApiAuth, (req, res) => { const t = todayStr(); res.json({ success: true, orders: db.get('orders').value().filter(o => isActive(o) && o.payment_status === 'confirmed' && (o.type==='one_time'?(o.deliveryDate||o.startDate)===t:true)) }); });
 app.get('/api/orders/:id',         requireApiAuth, (req, res) => { const o = db.get('orders').find({ id: req.params.id }).value(); o ? res.json({ success:true, order:o }) : res.status(404).json({ success:false, error:'Not found' }); });
 app.post('/api/orders',            requireApiAuth, async (req, res) => {
   const { name, phone, email, address, item, amount, type, startDate } = req.body;
@@ -602,10 +602,10 @@ app.patch('/api/agents/:id', requireApiAuth, (req, res) => { db.get('agents').fi
 app.delete('/api/agents/:id',requireApiAuth, (req, res) => { db.get('agents').remove({ id:req.params.id }).write(); res.json({ success:true }); });
 
 app.get('/api/stats', requireApiAuth, (req, res) => {
-  const all = db.get('orders').value(), active = all.filter(isActive), t = todayStr();
+  const all = db.get('orders').value(), active = all.filter(o => isActive(o) && o.payment_status === 'confirmed'), t = todayStr();
   const areaMap = {};
   active.forEach(o => { const a = o.area||'Other'; areaMap[a] = (areaMap[a]||0)+1; });
-  res.json({ success:true, stats: { totalActive:active.length, revenue:all.reduce((s,o)=>s+o.amount,0), todayOrders:active.filter(o=>o.type==='one_time'?o.startDate===t:o.created?.startsWith(t)).length, customers:[...new Set(active.map(o=>o.phone))].length, areaWise:areaMap } });
+  res.json({ success:true, stats: { totalActive:active.length, revenue:active.reduce((s,o)=>s+o.amount,0), todayOrders:active.filter(o=>o.type==='one_time'?o.startDate===t:o.created?.startsWith(t)).length, customers:[...new Set(active.map(o=>o.phone))].length, areaWise:areaMap } });
 });
 
 
