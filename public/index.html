@@ -1206,17 +1206,20 @@ footer {
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 
-  // Set min dates with 8 AM cutoff logic
+  // Set min dates with 8 AM cutoff logic (IST aware)
   const now = new Date();
-  const todayDate = now.toISOString().split('T')[0];
-  const currentHour = now.getHours();
+  const currentHour = now.getHours(); // Browser ka local time (IST)
 
-  // Agar 8 AM se pehle hai toh aaj ka din allow, warna kal se
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowDate = tomorrow.toISOString().split('T')[0];
+  // Local date string (IST) — toISOString UTC deta hai isliye yeh use karo
+  const pad = n => String(n).padStart(2, '0');
+  const todayDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 
-  // 8 AM (hour < 8) = aaj allow, 8 AM baad = kal se hi allow
+  // Kal ki date
+  const tomorrowObj = new Date(now);
+  tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+  const tomorrowDate = `${tomorrowObj.getFullYear()}-${pad(tomorrowObj.getMonth()+1)}-${pad(tomorrowObj.getDate())}`;
+
+  // 8 AM se pehle = aaj allow, 8 AM ke baad = sirf kal se
   const minAllowedDate = currentHour < 8 ? todayDate : tomorrowDate;
 
   // Delivery date min set karo
@@ -1673,4 +1676,3 @@ footer {
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>
- 
