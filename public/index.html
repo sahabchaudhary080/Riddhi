@@ -1527,14 +1527,26 @@ footer {
         notes:   { address },
         theme:   { color: '#7B1FA2' },
         modal: {
-          ondismiss: function() {
+          ondismiss: async function() {
+            // ✅ FIX: User ne popup band kiya — order cancel mark karo
+            await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ order_id: data.order_id, status: 'cancelled' })
+            }).catch(()=>{});
             btn.textContent = '🌸 Proceed to Payment';
             btn.disabled    = false;
           }
         }
       };
       const rzp = new Razorpay(options);
-      rzp.on('payment.failed', function(response) {
+      rzp.on('payment.failed', async function(response) {
+        // ✅ FIX: Payment fail — DB mein failed mark karo
+        await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: data.order_id, status: 'failed' })
+        }).catch(()=>{});
         showModal('❌', 'Payment Failed', 'Payment fail ho gayi. Dobara try karo ya call karein: 8923471161');
       });
       rzp.open();
