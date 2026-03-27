@@ -1206,14 +1206,25 @@ footer {
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 
-  // Set min dates
-  const today = new Date().toISOString().split('T')[0];
-  // Delivery date min = aaj
+  // Set min dates with 8 AM cutoff logic
+  const now = new Date();
+  const todayDate = now.toISOString().split('T')[0];
+  const currentHour = now.getHours();
+
+  // Agar 8 AM se pehle hai toh aaj ka din allow, warna kal se
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowDate = tomorrow.toISOString().split('T')[0];
+
+  // 8 AM (hour < 8) = aaj allow, 8 AM baad = kal se hi allow
+  const minAllowedDate = currentHour < 8 ? todayDate : tomorrowDate;
+
+  // Delivery date min set karo
   const delivDateEl = document.getElementById('f_delivery_date');
-  if(delivDateEl) { delivDateEl.min = today; delivDateEl.value = today; }
-  // Subscription start date min = aaj
+  if(delivDateEl) { delivDateEl.min = minAllowedDate; delivDateEl.value = minAllowedDate; }
+  // Subscription start date min set karo
   const startDateEl = document.getElementById('f_start_date');
-  if(startDateEl) { startDateEl.min = today; startDateEl.value = today; }
+  if(startDateEl) { startDateEl.min = minAllowedDate; startDateEl.value = minAllowedDate; }
 
   let qtyP = 1, qtyG = 0;
 
