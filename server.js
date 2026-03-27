@@ -469,7 +469,17 @@ app.post('/api/create-payment', async (req, res) => {
 });
 
 app.post('/api/verify-payment', (req, res) => {
-  const { order_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const { order_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, status } = req.body;
+
+  // ✅ FIX: Frontend se cancel / failed aaya toh DB update karo
+  if (status === 'cancelled' || status === 'failed') {
+    db.get('orders').find({ id: order_id }).assign({
+      payment_status: status,
+      updatedAt: new Date().toISOString()
+    }).write();
+    console.log(`⚠️  Order ${order_id} marked as ${status}`);
+    return res.json({ success: true });
+  }
   if (!RZP_KEY_SECRET || RZP_KEY_SECRET.includes('secret_key_yahan')) {
     db.get('orders').find({ id: order_id }).assign({ payment_status: 'confirmed' }).write();
     return res.json({ success: true });
